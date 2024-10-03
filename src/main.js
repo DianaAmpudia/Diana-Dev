@@ -136,7 +136,7 @@ let config = {};
 
 async function loadConfig() {
   try {
-    const response = await fetch('/api/config');
+    const response = await fetch('api/config'); 
     config = await response.json();
     console.log('Configuración cargada:', config);
     
