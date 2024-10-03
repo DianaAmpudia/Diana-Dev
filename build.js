@@ -2,14 +2,16 @@ const fs = require("fs");
 const path = require("path");
 
 
-if (!fs.existsSync("./public")) {
-  fs.mkdirSync("./public", { recursive: true });
+function ensureDirectoryExists(dirPath) {
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+    console.log(`Created directory: ${dirPath}`);
+  }
 }
 
 
-if (!fs.existsSync("./public/api")) {
-  fs.mkdirSync("./public/API", { recursive: true });
-}
+ensureDirectoryExists("./public");
+ensureDirectoryExists("./public/api");
 
 
 const configContent = `const config = {
@@ -19,19 +21,27 @@ const configContent = `const config = {
 };`;
 
 
-fs.writeFileSync("./public/api/config.js", configContent);
+const configPath = './public/api/config.js';
+fs.writeFileSync(configPath, configContent);
+console.log(`Created config file: ${configPath}`);
 
 
 const filesToCopy = ['index.html', 'main.js', 'style.css'];
 
 filesToCopy.forEach(file => {
   const srcPath = path.join('./src', file);
-  if (fs.existsSync(srcPath)) {
-    fs.copyFileSync(srcPath, `./public/${file}`);
-    console.log(`Copied ${srcPath} to ./public/${file}`);
-  } else {
-    console.log(`Warning: ${srcPath} not found`);
+  const destPath = path.join('./public', file);
+  
+  try {
+    if (fs.existsSync(srcPath)) {
+      fs.copyFileSync(srcPath, destPath);
+      console.log(`Copied ${srcPath} to ${destPath}`);
+    } else {
+      console.log(`Warning: Source file not found: ${srcPath}`);
+    }
+  } catch (error) {
+    console.error(`Error copying ${file}:`, error);
   }
 });
 
-console.log("Build completed: Files have been copied to public directory");
+console.log("Build process completed");
