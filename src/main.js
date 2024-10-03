@@ -131,39 +131,68 @@ function openProjectModal(index) {
 }
 
 /*-----------  FORMULARIO DE CONTACTO -----------*/
-emailjs.init(config.EMAIL_PUBLIC_KEY);
-document
-  .getElementById("contact-form")
-  .addEventListener("submit", function (event) {
-    event.preventDefault();
 
+let config = {};
+
+async function loadConfig() {
+  try {
+    const response = await fetch('/api/config');
+    config = await response.json();
+    console.log('Configuración cargada:', config);
+    
+
+    emailjs.init(config.EMAIL_PUBLIC_KEY);
+    
+
+    setupFormSubmission();
+  } catch (error) {
+    console.error('Error al cargar la configuración:', error);
     Swal.fire({
-      title: "Enviando...",
-      text: "Por favor, espere",
-      allowOutsideClick: false,
-      showConfirmButton: false,
-      willOpen: () => {
-        Swal.showLoading();
-      },
+      icon: "error",
+      title: "Error",
+      text: "No se pudo cargar la configuración. Por favor, recarga la página.",
     });
+  }
+}
 
-    emailjs.sendForm(config.EMAIL_SERVICE_ID, config.EMAIL_TEMPLATE_ID, this).then(
-      function () {
-        console.log("SUCCESS!");
-        Swal.fire({
-          icon: "success",
-          title: "¡Éxito!",
-          text: "Mensaje enviado con éxito",
-        });
-        document.getElementById("contact-form").reset();
-      },
-      function (error) {
-        console.log("FAILED...", error);
-        Swal.fire({
-          icon: "error",
-          title: "Error",
-          text: "Error al enviar el mensaje. Por favor, intenta de nuevo.",
-        });
-      }
-    );
-  });
+
+function setupFormSubmission() {
+  document
+    .getElementById("contact-form")
+    .addEventListener("submit", function (event) {
+      event.preventDefault();
+
+      Swal.fire({
+        title: "Enviando...",
+        text: "Por favor, espere",
+        allowOutsideClick: false,
+        showConfirmButton: false,
+        willOpen: () => {
+          Swal.showLoading();
+        },
+      });
+
+      emailjs.sendForm(config.EMAIL_SERVICE_ID, config.EMAIL_TEMPLATE_ID, this).then(
+        function () {
+          console.log("SUCCESS!");
+          Swal.fire({
+            icon: "success",
+            title: "¡Éxito!",
+            text: "Mensaje enviado con éxito",
+          });
+          document.getElementById("contact-form").reset();
+        },
+        function (error) {
+          console.log("FAILED...", error);
+          Swal.fire({
+            icon: "error",
+            title: "Error",
+            text: "Error al enviar el mensaje. Por favor, intenta de nuevo.",
+          });
+        }
+      );
+    });
+}
+
+
+loadConfig();
